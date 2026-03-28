@@ -33,3 +33,22 @@ KrishiSahayak uses AI models and APIs to provide:
 ## 🚀 How to Run
 
 ### 1. Start Backend
+
+### 2. Start Frontend
+
+## 📊 Architecture
+Farmer Input → FastAPI Backend → AI Models → Recommendation Output
+
+## 🌍 Impact
+- Improves crop yield
+- Reduces fertilizer misuse
+- Helps farmers make data-driven decisions
+
+## 🔮 Future Scope
+- Crop disease detection using AI
+- Voice assistant in Hindi
+- Satellite-based crop monitoring
+- Mobile app deployment
+
+## 👨‍💻 Team
+Hackathon Project
