@@ -169,7 +169,7 @@ if st.button("Detect Disease", key="disease"):
             if "error" in data:
                 st.error(data["error"])
             else:
-                st.image(image, caption="Uploaded Leaf", use_column_width=True)
+                st.image(image, caption="Uploaded Leaf", width=500)
 
                 st.success(f"🌿 Disease: {data['disease']}")
                 st.info(f"💊 Treatment: {data['treatment']}")
