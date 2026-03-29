@@ -13,29 +13,6 @@ AI-powered smart farming assistant for Indian farmers.
 * 🔊 Voice Output (Hindi + English)
 
 ---
-## 🏗 System Architecture (Agent-Oriented)
-
-```mermaid
-flowchart LR
-
-A[Farmer User] --> B[Streamlit UI]
-
-B --> C[FastAPI Backend]
-
-C --> D[Soil Agent]
-C --> E[Weather Agent]
-C --> F[Market Agent]
-C --> G[Disease Agent]
-
-D --> H[Response Generator]
-E --> H
-F --> H
-G --> H
-
-H --> I[Final Advice]
-
-I --> B
-```
 
 ---
 
