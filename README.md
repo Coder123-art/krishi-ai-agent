@@ -13,7 +13,9 @@ AI-powered smart farming assistant for Indian farmers.
 * 🔊 Voice Output (Hindi + English)
 
 ---
-##🏗 System Architecture (Agent-Oriented)
+## 🏗 System Architecture (Agent-Oriented)
+
+```mermaid
 flowchart LR
 
 %% -------- Layers --------
@@ -68,6 +70,7 @@ D --> R
 R --> O
 O --> V
 O --> UI
+```
 
 
 
