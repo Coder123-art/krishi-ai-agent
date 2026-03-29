@@ -14,6 +14,7 @@ AI-powered smart farming assistant for Indian farmers.
 
 ---
 ## 🏗 System Architecture (Agent-Oriented)
+## 🏗 System Architecture (Agent-Oriented)
 
 ```mermaid
 flowchart LR
@@ -24,7 +25,7 @@ UI[Streamlit UI<br/>Inputs: NPK, City, Image<br/>Outputs: Text + Voice]
 end
 
 subgraph API
-API[FastAPI Gateway<br/>/soil_analysis<br/>/weather_real<br/>/market_price<br/>/detect_disease]
+API[FastAPI Gateway<br/>soil_analysis<br/>weather_real<br/>market_price<br/>detect_disease]
 end
 
 subgraph Agents
@@ -36,12 +37,12 @@ end
 
 subgraph Integrations
 OW[OpenWeather API]
-ML[Image Model / Rules]
-DB[(Cache/Config)]
+ML[Image Model or Rules]
+DB[(Cache or Config)]
 end
 
 subgraph Processing
-R[Response Composer<br/>Merge + Validate]
+R[Response Composer<br/>Merge and Validate]
 V[Voice Engine gTTS]
 end
 
@@ -70,6 +71,7 @@ D --> R
 R --> O
 O --> V
 O --> UI
+```
 
 
 ## 🔄 Data Flow
