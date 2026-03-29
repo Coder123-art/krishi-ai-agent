@@ -1,54 +1,117 @@
 # 🌾 KrishiSahayak AI Agent
 
-## 🚜 Overview
-KrishiSahayak is an AI-powered agricultural advisory system designed to assist farmers in making informed decisions. It combines soil analysis, weather forecasting, and market insights to deliver actionable recommendations.
+AI-powered smart farming assistant for Indian farmers.
 
-## ❗ Problem
-Farmers often lack access to real-time and reliable information about:
-- Soil health
-- Weather conditions
-- Crop diseases
-- Market prices
+---
 
-This leads to reduced yield, improper fertilizer use, and financial losses.
+## 🚀 Features
 
-## 💡 Solution
-KrishiSahayak uses AI models and APIs to provide:
-- 🌱 Soil-based fertilizer recommendations
-- 🌦 Weather-aware irrigation advice
-- 💰 Market price predictions
+* 🌱 Soil Analysis (NPK-based)
+* 🌦 Weather Advisory
+* 💰 Market Price Prediction
+* 🌿 Crop Disease Detection
+* 🔊 Voice Output (Hindi + English)
 
-## ⚙️ Features
-- Soil nutrient analysis (NPK-based)
-- Irrigation recommendations using weather patterns
-- Crop price prediction system
-- Simple and interactive UI (Streamlit)
+---
 
-## 🧠 Tech Stack
-- Backend: FastAPI
-- Frontend: Streamlit
-- Language: Python
-- APIs: Weather API (optional integration)
+## 🏗 System Architecture
 
-## 🚀 How to Run
+```mermaid
+flowchart TD
 
-### 1. Start Backend
+A[Farmer (Streamlit UI)]
+A --> B[FastAPI Backend]
 
-### 2. Start Frontend
+B --> C[Soil Agent]
+B --> D[Weather Agent]
+B --> E[Market Agent]
+B --> F[Disease Agent]
 
-## 📊 Architecture
-Farmer Input → FastAPI Backend → AI Models → Recommendation Output
+C --> G[Response Composer]
+D --> G
+E --> G
+F --> G
 
-## 🌍 Impact
-- Improves crop yield
-- Reduces fertilizer misuse
-- Helps farmers make data-driven decisions
+G --> H[Final Advisory Output]
 
-## 🔮 Future Scope
-- Crop disease detection using AI
-- Voice assistant in Hindi
-- Satellite-based crop monitoring
-- Mobile app deployment
+H --> I[UI Display]
+H --> J[Voice Output (gTTS)
+```
 
-## 👨‍💻 Team
-Hackathon Project
+---
+
+## 🏗 Architectural View
+
+```mermaid
+flowchart LR
+
+subgraph Presentation
+UI[Streamlit UI]
+end
+
+subgraph API
+API[FastAPI Gateway]
+end
+
+subgraph Agents
+S[Soil Agent]
+W[Weather Agent]
+M[Market Agent]
+D[Disease Agent]
+end
+
+subgraph Processing
+R[Response Composer]
+V[Voice Engine]
+end
+
+subgraph Output
+O[Final Advisory]
+end
+
+UI --> API
+API --> S
+API --> W
+API --> M
+API --> D
+
+S --> R
+W --> R
+M --> R
+D --> R
+
+R --> O
+O --> V
+O --> UI
+```
+
+---
+
+## 🔄 Data Flow
+
+User → Streamlit UI → FastAPI → Agents → Response Composer → UI + Voice Output
+
+---
+
+## ⚙️ Tech Stack
+
+* Frontend: Streamlit
+* Backend: FastAPI
+* Voice: gTTS
+* APIs: OpenWeather
+
+---
+
+## ▶️ Run Locally
+
+### Install dependencies
+
+pip install -r requirements.txt
+
+### Run backend
+
+uvicorn agri_agent:app --reload
+
+### Run frontend
+
+streamlit run app.py
