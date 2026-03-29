@@ -4,7 +4,7 @@
 flowchart TD
 
 A[Farmer (Streamlit UI)]
-A -->|Inputs (NPK, city, image)| B[FastAPI Backend]
+A --> B[FastAPI Backend]
 
 B --> C[Soil Agent]
 B --> D[Weather Agent]
@@ -20,41 +20,39 @@ G --> H[Final Advisory Output]
 
 H --> I[UI Display]
 H --> J[Voice Output (gTTS)]
+
+---
+
+```markdown
 ## 🏗 Architectural View
 
 ```mermaid
 flowchart LR
 
-%% ----------- Presentation Layer -----------
-subgraph L1["Presentation Layer"]
-UI[Streamlit UI<br/>- Inputs (NPK, City)<br/>- Image Upload<br/>- Voice Output]
+subgraph Presentation
+UI[Streamlit UI]
 end
 
-%% ----------- API Layer -----------
-subgraph L2["API Layer"]
-API[FastAPI Gateway<br/>REST Endpoints]
+subgraph API
+API[FastAPI Gateway]
 end
 
-%% ----------- Intelligence Layer -----------
-subgraph L3["AI / Agent Layer"]
-S[Soil Agent<br/>NPK Analysis]
-W[Weather Agent<br/>OpenWeather API]
-M[Market Agent<br/>Price Prediction]
-D[Disease Agent<br/>Image Model]
+subgraph Agents
+S[Soil Agent]
+W[Weather Agent]
+M[Market Agent]
+D[Disease Agent]
 end
 
-%% ----------- Processing Layer -----------
-subgraph L4["Processing Layer"]
-R[Response Composer<br/>Merge + JSON]
-V[Voice Engine (gTTS)]
+subgraph Processing
+R[Response Composer]
+V[Voice Engine]
 end
 
-%% ----------- Output Layer -----------
-subgraph L5["Output Layer"]
-O[Final Advisory<br/>Fertilizer + Irrigation + Market + Treatment]
+subgraph Output
+O[Final Advisory]
 end
 
-%% ----------- Connections -----------
 UI --> API
 API --> S
 API --> W
