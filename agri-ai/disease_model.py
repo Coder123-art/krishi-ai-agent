@@ -1,27 +1,34 @@
 import numpy as np
 from PIL import Image
 
+# Treatment mapping
+treatments = {
+    "Healthy Leaf": "No action needed",
+    "Leaf Spot Disease": "Apply copper fungicide",
+    "Powdery Mildew": "Use sulfur spray",
+    "Rust Infection": "Spray neem oil"
+}
+
 def predict_disease(image_file):
 
     img = Image.open(image_file).resize((224, 224))
     img = np.array(img)
 
-    # average color channels
     avg_red = np.mean(img[:,:,0])
     avg_green = np.mean(img[:,:,1])
     avg_blue = np.mean(img[:,:,2])
 
     # 🌿 Smart logic
     if avg_green > avg_red and avg_green > avg_blue:
-        # Mostly green → healthy
-        return "🌿 Healthy Leaf (No disease detected)"
-
+        disease = "Healthy Leaf"
     else:
-        diseases = [
-            "🟤 Leaf Spot Disease",
-            "⚪ Powdery Mildew",
-            "🟠 Rust Infection"
-        ]
+        disease = np.random.choice([
+            "Leaf Spot Disease",
+            "Powdery Mildew",
+            "Rust Infection"
+        ])
 
-        # pick disease only if unhealthy
-        return np.random.choice(diseases)
+    return {
+        "disease": disease,
+        "treatment": treatments[disease]
+    }

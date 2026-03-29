@@ -1,115 +1,74 @@
-from fastapi import FastAPI, UploadFile, File
-from PIL import Image
-import numpy as np
+from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import random
 import requests
-import io
-import os
 from gtts import gTTS
+
+from disease_model import predict_disease
 
 app = FastAPI()
 
-# -----------------------------
-# 🌱 Soil Analysis (Rule-Based)
-# -----------------------------
+app.mount("/static", StaticFiles(directory="."), name="static")
 
-fertilizer_rules = {
-    "low_nitrogen": "Use Urea fertilizer",
-    "low_phosphorus": "Use DAP fertilizer",
-    "low_potassium": "Use MOP fertilizer"
-}
-
-@app.get("/")
-def home():
-    return {"message": "Krishi AI Agent Running"}
-
+# =========================
+# 🌱 Soil Analysis API
+# =========================
 @app.post("/soil_analysis")
-def soil_analysis(nitrogen: int, phosphorus: int, potassium: int):
+def soil_analysis(
+    nitrogen: int = Form(...),
+    phosphorus: int = Form(...),
+    potassium: int = Form(...)
+):
+    # ✅ calculate score
+    score = (nitrogen + phosphorus + potassium) / 3
 
-    report = []
-    score = 0
+    details = []
+    suggestions = []
 
-    # Nitrogen
+    # 🔍 Individual nutrient checks
     if nitrogen < 40:
-        report.append("🟥 Nitrogen is LOW → Apply Urea")
-    elif nitrogen < 70:
-        report.append("🟨 Nitrogen is MEDIUM → Maintain balance")
-        score += 1
-    else:
-        report.append("🟩 Nitrogen is GOOD")
-        score += 2
+        details.append("Low Nitrogen detected")
+        suggestions.append("Apply Urea fertilizer")
 
-    # Phosphorus
     if phosphorus < 40:
-        report.append("🟥 Phosphorus is LOW → Apply DAP")
-    elif phosphorus < 70:
-        report.append("🟨 Phosphorus is MEDIUM")
-        score += 1
-    else:
-        report.append("🟩 Phosphorus is GOOD")
-        score += 2
+        details.append("Low Phosphorus detected")
+        suggestions.append("Use DAP fertilizer")
 
-    # Potassium
     if potassium < 40:
-        report.append("🟥 Potassium is LOW → Apply MOP")
-    elif potassium < 70:
-        report.append("🟨 Potassium is MEDIUM")
-        score += 1
-    else:
-        report.append("🟩 Potassium is GOOD")
-        score += 2
+        details.append("Low Potassium detected")
+        suggestions.append("Use MOP fertilizer")
 
-    # Soil Health Score
-    if score >= 5:
-        health = "🟢 Excellent Soil"
-    elif score >= 3:
+    # 🌱 Overall soil health
+    if score > 70 and not details:
+        health = "🟢 Healthy Soil"
+        details = [
+            "All nutrients are in optimal range",
+            "Suitable for most crops",
+            "Maintain current practices"
+        ]
+
+    elif score > 50:
         health = "🟡 Moderate Soil"
+        details.append("Some nutrients need improvement")
+        suggestions.append("Use balanced NPK fertilizer")
+
     else:
         health = "🔴 Poor Soil"
+        details.append("Multiple nutrient deficiencies")
+        suggestions.append("Add compost and organic matter")
+
+    # 🧠 Combine everything
+    final_details = details + suggestions
 
     return {
         "soil_health": health,
-        "details": report
+        "details": final_details
     }
-
-# -----------------------------
-# 🌦 Real Weather API
-# -----------------------------
-from fastapi import FastAPI
-import requests
-
-app = FastAPI()
-
-API_KEY = "eae50a8b4cee88ee3307c4ecfccd49a2"
-
-
-def generate_advice(data):
-    temp = data["main"]["temp"]
-    humidity = data["main"]["humidity"]
-    rainfall = data.get("rain", {}).get("1h", 0)
-    weather_main = data["weather"][0]["main"]
-
-    if rainfall > 5:
-        return "🌧 Heavy rain → Do NOT irrigate"
-
-    elif rainfall > 0:
-        return "🌦 Light rain → Reduce irrigation"
-
-    elif weather_main == "Rain":
-        return "🌧 Rain detected → Avoid irrigation"
-
-    elif temp > 35:
-        return "🔥 High temperature → Frequent irrigation needed"
-
-    elif humidity > 80:
-        return "💧 High humidity → Reduce watering"
-
-    elif temp < 15:
-        return "❄ Cold weather → Minimal irrigation"
-
-    else:
-        return "✅ Normal conditions → Balanced irrigation"
-
+# =========================
+# 🌥️ Weather API (REAL)
+# =========================
+API_KEY = "eae50a8b4cee88ee3307c4ecfccd49a2"   # ⚠️ Put your OpenWeatherMap API key here
 
 @app.get("/weather_real")
 def weather_real(city: str = "Delhi"):
@@ -124,143 +83,81 @@ def weather_real(city: str = "Delhi"):
 
         data = response.json()
 
+        temp = data["main"]["temp"]
+        humidity = data["main"]["humidity"]
+
+        # Simple rainfall logic
+        rainfall = data.get("rain", {}).get("1h", 0)
+
+        # Smart advice
+        if temp > 35:
+            advice = "🌞 High temperature, irrigate crops frequently"
+        elif rainfall > 5:
+            advice = "🌧 Heavy rain expected, ensure drainage"
+        else:
+            advice = "🌤 Weather is stable, normal farming conditions"
+
         return {
             "city": city,
-            "temperature": data["main"]["temp"],
-            "humidity": data["main"]["humidity"],
-            "rainfall": data.get("rain", {}).get("1h", 0),
-            "condition": data["weather"][0]["main"],
-            "advice": generate_advice(data)
+            "temperature": temp,
+            "humidity": humidity,
+            "rainfall": rainfall,
+            "advice": advice
         }
 
-    except Exception as e:
-        return {"error": str(e)}
+    except:
+        return {"error": "Weather service failed"}
 
-# -----------------------------
-# 💰 Market Price Prediction
-# -----------------------------
 
+# =========================
+# 📊 Market Price API
+# =========================
 @app.get("/market_price")
-def price(crop: str):
+def market_price(crop: str):
 
-    base_prices = {
-        "wheat": 2200,
-        "rice": 2100,
-        "maize": 1800,
-        "sweetcorn": 2500,
-        "sweetpotato": 3000,
-        "sugarcane": 1500,
-        "cotton": 3500,
-        "soybean": 2800,
-        "groundnut": 3200,
-        "sunflower": 2700,
-        "jujube": 4000,
-        "guava": 3500,
-        "mango": 5000,
-        "banana": 3000,
-        "orange": 4000,
-        "grapes": 4500
-    }
+    base_price = random.randint(1000, 5000)
+    change = random.randint(-500, 700)
 
-    crop_lower = crop.lower()
+    predicted_price = base_price + change
 
-    if crop_lower not in base_prices:
-        return {"error": "Crop not found"}
-
-    base = base_prices[crop_lower]
-
-    # realistic variation
-    variation = random.randint(-300, 300)
-    final_price = base + variation
-
-    # trend logic
-    if variation > 100:
+    if change > 400:
         trend = "📈 High Demand"
-    elif variation > 0:
-        trend = "📈 Increasing"
-    elif variation < -100:
-        trend = "📉 Low Demand"
+    elif change > 0:
+        trend = "⬆️ Increasing"
     else:
-        trend = "📉 Decreasing"
+        trend = "⬇️ Decreasing"
 
     return {
-        "crop": crop.capitalize(),
-        "base_price": base,
-        "predicted_price": final_price,
+        "crop": crop,
+        "base_price": base_price,
+        "predicted_price": predicted_price,
         "market_trend": trend
     }
 
-# -----------------------------
-# 🌿 Crop Disease Detection
-# -----------------------------
-diseases = {
-    "Healthy Leaf": "No action needed",
-    "Leaf Spot Disease": "Apply copper fungicide",
-    "Powdery Mildew": "Use sulfur spray",
-    "Rust Infection": "Spray neem oil"
-}
 
-# 🧠 Smart prediction function
-def predict_disease(image):
-
-    img = image.resize((224, 224))
-    img = np.array(img)
-
-    avg_red = np.mean(img[:,:,0])
-    avg_green = np.mean(img[:,:,1])
-    avg_blue = np.mean(img[:,:,2])
-
-    # 🌿 Green check
-    if avg_green > avg_red and avg_green > avg_blue:
-        disease = "Healthy Leaf"
-    else:
-        disease = random.choice([
-            "Leaf Spot Disease",
-            "Powdery Mildew",
-            "Rust Infection"
-        ])
-
-    return {
-        "disease": disease,
-        "treatment": diseases[disease]
-    }
-
-
-# 🔊 Voice generator
-def generate_voice(text):
-    tts = gTTS(text=text, lang='en')
-    file_path = "output.mp3"
-    tts.save(file_path)
-    return file_path
-
-
-# 🚀 API endpoint
+# =========================
+# 🌿 Disease Detection API
+# =========================
 @app.post("/detect_disease")
-async def detect_disease(file: UploadFile = File(None)):
-
-    # ❌ Validation (no file)
-    if file is None:
-        return {"error": "No image uploaded"}
-
+async def detect_disease(file: UploadFile = File(...)):
     try:
-        contents = await file.read()
+        # ✅ Call ML model
+        result = predict_disease(file.file)
 
-        if not contents:
-            return {"error": "Empty file uploaded"}
+        disease = result["disease"]
+        treatment = result["treatment"]
 
-        image = Image.open(io.BytesIO(contents))
+        # 🔊 Generate voice output
+        text = f"{disease} detected. Treatment is {treatment}"
+        tts = gTTS(text=text, lang="en")
+        audio_path = "output.mp3"
+        tts.save(audio_path)
 
-        result = predict_disease(image)
-
-        # 🔊 Add voice output
-        voice_text = f"{result['disease']}. Treatment: {result['treatment']}"
-        audio_path = generate_voice(voice_text)
-
-        return {
-            "disease": result["disease"],
-            "treatment": result["treatment"],
-            "audio": audio_path
-        }
+        return JSONResponse({
+    "disease": disease,
+    "treatment": treatment,
+    "audio": "voice.mp3"
+})
 
     except Exception as e:
         return {"error": str(e)}
