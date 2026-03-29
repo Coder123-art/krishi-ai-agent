@@ -54,11 +54,7 @@ I --> B
 
 ---
 
-This is:
-- ✅ Easy to understand  
-- ✅ Clean for judges  
-- ✅ 100% GitHub-safe  
-- ✅ No rendering errors  
+ 
 
 ---
 
