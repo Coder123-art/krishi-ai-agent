@@ -14,30 +14,6 @@ AI-powered smart farming assistant for Indian farmers.
 
 ---
 
----
-
-## 🔍 What it shows (short explanation)
-
-- **Farmer User** → interacts with the app  
-- **Streamlit UI** → takes input (soil, city, image)  
-- **FastAPI Backend** → processes requests  
-- **Agents**:
-  - Soil → fertilizer advice  
-  - Weather → irrigation advice  
-  - Market → price prediction  
-  - Disease → plant treatment  
-- **Response Generator** → combines everything  
-- **Final Advice** → shown back in UI  
-
----
-
- 
-
----
-
-If you want next step:
-👉 I can give you a **“pro-level architecture” that looks like startup diagrams (for winning submissions)**
-
 
 ## 🔄 Data Flow
 
