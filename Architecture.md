@@ -1,79 +1,71 @@
-  ┌────────────────────────────┐
-                 │      Farmer Interface      │
-                 │        (Streamlit)         │
-                 │  - Inputs (NPK, city)     │
-                 │  - Image upload           │
-                 │  - Voice output (gTTS)    │
-                 └────────────┬──────────────┘
-                              │ HTTP (REST)
-                              ▼
-                 ┌────────────────────────────┐
-                 │        API Gateway         │
-                 │        (FastAPI)           │
-                 │  - /soil_analysis          │
-                 │  - /weather_real           │
-                 │  - /market_price           │
-                 │  - /detect_disease         │
-                 └────────────┬──────────────┘
-                              │
-          ┌───────────────────┼───────────────────┐
-          ▼                   ▼                   ▼
-┌────────────────┐  ┌────────────────┐  ┌──────────────────┐
-│  Soil Agent    │  │ Weather Agent  │  │  Market Agent    │
-│  (Rule/ML)     │  │ (API Logic)    │  │ (Trend/Logic)    │
-│ - NPK analysis │  │ - OpenWeather  │  │ - Price predict  │
-│ - Fertilizer   │  │ - Irrigation   │  │ - Demand trend   │
-└────────────────┘  └────────────────┘  └──────────────────┘
-          │                   │                   │
-          └────────────┬──────┴──────────────┬────┘
-                       ▼                     ▼
-               ┌────────────────┐   ┌────────────────────┐
-               │ Disease Agent  │   │  Voice Engine      │
-               │ (Image Model)  │   │   (gTTS)           │
-               │ - CNN / Mock   │   │ - Hindi/English    │
-               │ - Treatment    │   │ - Audio response   │
-               └────────────────┘   └────────────────────┘
-                              │
-                              ▼
-                 ┌────────────────────────────┐
-                 │     Response Composer      │
-                 │  - Merge outputs           │
-                 │  - Format JSON             │
-                 └────────────┬──────────────┘
-                              │
-                              ▼
-                 ┌────────────────────────────┐
-                 │     Final Advisory         │
-                 │  - Fertilizer advice       │
-                 │  - Irrigation plan         │
-                 │  - Market decision         │                                                                                                                              
-                 │  - Disease treatment       │
-                 └────────────────────────────┘
-🔧 Data Flow
-User → Streamlit UI → FastAPI → Agents (Soil/Weather/Market/Disease)
-→ Response Composer → JSON → Streamlit → Voice Output + Display
+## 🏗 System Architecture
 
+```mermaid
+flowchart TD
 
-🧠 Key Components
-Frontend: Streamlit (UI + Voice Playback)
-Backend: FastAPI (API Gateway)
-Agents:
-Soil Intelligence (NPK logic)
-Weather Intelligence (API-based)
-Market Intelligence (trend logic)
-Disease Detection (image model)
-Voice Engine: gTTS
-External API: OpenWeather
+A[Farmer (Streamlit UI)]
+A -->|Inputs (NPK, city, image)| B[FastAPI Backend]
 
+B --> C[Soil Agent]
+B --> D[Weather Agent]
+B --> E[Market Agent]
+B --> F[Disease Agent]
 
-⚙️ Deployment View
-[ User Browser ]
-        │
-        ▼
-[ Streamlit App (Port 8501) ]
-        │
-        ▼
-[ FastAPI Server (Port 8000) ]
-        │
-        ▼
-[ AI Agents + External APIs ]
+C --> G[Response Composer]
+D --> G
+E --> G
+F --> G
+
+G --> H[Final Advisory Output]
+
+H --> I[UI Display]
+H --> J[Voice Output (gTTS)]
+## 🏗 Architectural View
+
+```mermaid
+flowchart LR
+
+%% ----------- Presentation Layer -----------
+subgraph L1["Presentation Layer"]
+UI[Streamlit UI<br/>- Inputs (NPK, City)<br/>- Image Upload<br/>- Voice Output]
+end
+
+%% ----------- API Layer -----------
+subgraph L2["API Layer"]
+API[FastAPI Gateway<br/>REST Endpoints]
+end
+
+%% ----------- Intelligence Layer -----------
+subgraph L3["AI / Agent Layer"]
+S[Soil Agent<br/>NPK Analysis]
+W[Weather Agent<br/>OpenWeather API]
+M[Market Agent<br/>Price Prediction]
+D[Disease Agent<br/>Image Model]
+end
+
+%% ----------- Processing Layer -----------
+subgraph L4["Processing Layer"]
+R[Response Composer<br/>Merge + JSON]
+V[Voice Engine (gTTS)]
+end
+
+%% ----------- Output Layer -----------
+subgraph L5["Output Layer"]
+O[Final Advisory<br/>Fertilizer + Irrigation + Market + Treatment]
+end
+
+%% ----------- Connections -----------
+UI --> API
+API --> S
+API --> W
+API --> M
+API --> D
+
+S --> R
+W --> R
+M --> R
+D --> R
+
+R --> O
+O --> V
+O --> UI
