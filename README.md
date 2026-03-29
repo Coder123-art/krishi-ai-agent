@@ -46,7 +46,7 @@ V[Voice Engine gTTS]
 end
 
 subgraph Output
-O[Final Advisory<br/>Fertilizer | Irrigation | Price | Treatment]
+O[Final Advisory<br/>Fertilizer, Irrigation, Price, Treatment]
 end
 
 %% -------- Flow --------
@@ -71,7 +71,6 @@ R --> O
 O --> V
 O --> UI
 ```
-
 
 ## 🔄 Data Flow
 
